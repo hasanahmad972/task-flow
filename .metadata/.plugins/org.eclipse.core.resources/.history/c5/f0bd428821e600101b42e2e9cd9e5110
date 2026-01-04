@@ -1,0 +1,24 @@
+package com.example.demo.service;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.dto.TaskAssignRequest;
+import com.example.demo.model.Task;
+import com.example.demo.repository.TaskRepository;
+import com.example.demo.repository.UserRepository;
+@Service
+public class TaskService {
+
+	@Autowired
+	private TaskRepository tr;
+	@Autowired
+	private UserRepository ur;
+	
+
+	public @Nullable Task assignTaskToUser(Long userId, TaskAssignRequest tar) {
+		
+		return null;
+	}
+
+}

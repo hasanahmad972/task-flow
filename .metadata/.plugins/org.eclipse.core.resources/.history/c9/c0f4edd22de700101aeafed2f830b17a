@@ -1,0 +1,36 @@
+package com.example.demo.repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.example.demo.model.Task;
+
+public interface TaskRepository extends JpaRepository<Task,Long> {
+	List <Task> findByUserId(Long userid);
+	Optional<Task> findById(Long id);
+	Page<Task>  findByUser_CreatedByAdmin_Id(Long id,Pageable pageable);
+	
+	
+	 @Query("""
+		        SELECT t FROM Task t
+		        WHERE t.user.createdByAdmin.id = :adminId
+		        AND (:userId IS NULL OR t.user.id = :userId)
+		        AND (:assignedFrom IS NULL OR t.assignedDate >= :assignedFrom)
+		        AND (:assignedTo IS NULL OR t.assignedDate <= :assignedTo)
+		        AND (:deadlineFrom IS NULL OR t.deadline >= :deadlineFrom)
+		        AND (:deadlineTo IS NULL OR t.deadline <= :deadlineTo)
+		        ORDER BY t.assignedDate DESC
+		    """)
+	Page<Task> filterTasks(@Param("adminId")Long id, Long userId, LocalDateTime assignedFrom, LocalDateTime assignedTo,
+			LocalDateTime deadlineFrom, LocalDateTime deadlineTo, Pageable pageable);
+
+}
+
+

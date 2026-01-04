@@ -1,0 +1,53 @@
+package com.example.demo.service;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.UserListResponse;
+import com.example.demo.model.Admin;
+import com.example.demo.model.User;
+import com.example.demo.repository.AdminRepository;
+import com.example.demo.repository.UserRepository;
+@Service
+public class AdminService {
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+    @Autowired
+	private UserRepository ur;
+	@Autowired
+	private AdminRepository ar;
+	public ResponseEntity<?> addUser(AuthRequest request) {
+		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+		String adminUsername=auth.getName();
+		Admin admin =ar.findByUsername(adminUsername)
+				       .orElseThrow(()->new RuntimeException("Admin not found"));
+		if(ur.existsByUsernameAndCreatedByAdmin(request.getUsername(), admin)) {
+			return ResponseEntity.badRequest()
+					       .body("User already exist");
+		}
+		User u=new User();
+		u.setPassword(passwordEncoder.encode(request.getPassword()));
+		u.setUsername(request.getUsername());
+		u.setCreatedByAdmin(admin);
+		ur.save(u);
+		return ResponseEntity.ok("User created successfully");
+	}
+	public ResponseEntity<?> getMyUsers(){
+		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+		String adminUsername=auth.getName();
+		Admin admin =ar.findByUsername(adminUsername)
+			       .orElseThrow(()->new RuntimeException("Admin not found"));
+		List<User> users=ur.findByCreatedByAdmin(admin);
+		List<UserListResponse> response=users.stream()
+				                             .map(u->new UserListResponse(u.getUsername(),u.getId()))
+				                             .toList();
+		return ResponseEntity.ok(response);
+	}
+	
+
+}
