@@ -13,7 +13,10 @@ import com.example.demo.dto.UserListResponse;
 import com.example.demo.model.Admin;
 import com.example.demo.model.User;
 import com.example.demo.repository.AdminRepository;
+import com.example.demo.repository.TaskRepository;
 import com.example.demo.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 @Service
 public class AdminService {
 	@Autowired
@@ -22,6 +25,8 @@ public class AdminService {
 	private UserRepository ur;
 	@Autowired
 	private AdminRepository ar;
+	@Autowired
+	private TaskRepository tr;
 	public ResponseEntity<?> addUser(AuthRequest request) {
 		Authentication auth=SecurityContextHolder.getContext().getAuthentication();
 		String adminUsername=auth.getName();
@@ -49,11 +54,13 @@ public class AdminService {
 				                             .toList();
 		return ResponseEntity.ok(response);
 	}
+	@Transactional
 	public ResponseEntity<String> delMyUsers(Long id) {
 		  if(!ur.existsById(id)) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not found");
 		 }
 		 try {
+			 tr.deleteByUserId(id);
 			 ur.deleteById(id);
 			return ResponseEntity.ok().body("user with "+id+" removed succesfully");
 		 }

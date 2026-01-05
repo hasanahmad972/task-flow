@@ -26,7 +26,7 @@ import com.example.demo.model.User;
 import com.example.demo.service.AdminService;
 import com.example.demo.service.TaskService;
 
-@CrossOrigin(origins="http://localhost:5173")
+@CrossOrigin(origins="http://localhost:5174")
 @RestController
 @RequestMapping("/admin")
 public class AdminController {

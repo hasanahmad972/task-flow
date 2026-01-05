@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.TaskAssignRequest;
 import com.example.demo.dto.TaskAssignResponse;
 import com.example.demo.dto.TaskListResponseDTO;
+import com.example.demo.dto.UserTaskListResponseDTO;
 import com.example.demo.model.Admin;
 import com.example.demo.model.Task;
 import com.example.demo.model.TaskStatus;
@@ -76,6 +77,35 @@ public class TaskService {
 			
 			
 		   }
+	 public Page<UserTaskListResponseDTO> getUserTasks(int page, int size, String username, LocalDate assignedDate,
+				LocalDate deadlineDate){
+		 User u=ur.findByUsername(username).orElseThrow(()->new RuntimeException("username not found"));
+		 Long userId=u.getId();
+		 LocalDateTime assignedFrom=null;
+		   LocalDateTime assignedTo=null;
+		   if(assignedDate!=null) {
+			   assignedFrom=assignedDate.atStartOfDay();
+			   assignedTo=assignedDate.atTime(LocalTime.MAX);
+		   }
+		   LocalDateTime deadlineFrom=null;
+		   LocalDateTime deadlineTo=null;
+		   if(deadlineDate!=null) {
+			   deadlineFrom=deadlineDate.atStartOfDay();
+			   deadlineTo=deadlineDate.atTime(LocalTime.MAX);
+		   }
+		   Pageable pageable=PageRequest.of(page, size, Sort.by("assignedDate").descending());
+		   Page<Task> taskPage=tr.userfilterTasks(userId,assignedFrom,assignedTo,deadlineFrom,deadlineTo,pageable);
+           return taskPage.map(task->{
+        	   UserTaskListResponseDTO dto=new UserTaskListResponseDTO();
+        	   dto.setId(task.getId());
+        	   dto.setTaskname(task.getTaskname());
+			   dto.setAssignedDate(task.getAssignedDate());
+			   dto.setDescription(task.getDescription());
+			   dto.setDeadline(task.getDeadline());
+			   dto.setStatus(task.getStatus());
+        	   return dto;
+           });
+	 }
 	 
 	 
 	 public Page<Task> getTasks(int page, int size) {
@@ -103,6 +133,24 @@ public class TaskService {
 				,u.getId());
 		return tas;
 	    }
+	 public void updateStatus(Long id, TaskStatus status) {
+		    // 1️⃣ Fetch the task
+		    Task task = tr.findById(id)
+		            .orElseThrow(() -> new RuntimeException("Task not found"));
+
+		    // 2️⃣ Optional: Prevent changing COMPLETED tasks back
+		    if ("COMPLETED".equals(task.getStatus())) {
+		        throw new RuntimeException("Completed task cannot be changed");
+		    }
+            
+		    // 3️⃣ Update status (replace previous)
+		    task.setStatus(status);
+
+		    // 4️⃣ Save
+		   tr.save(task);
+		}
+
+	 
   
   
 

@@ -1,0 +1,52 @@
+package com.example.demo.controller;
+
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.dto.TaskListResponseDTO;
+import com.example.demo.dto.UserTaskListResponseDTO;
+import com.example.demo.service.TaskService;
+import com.example.demo.service.UserService;
+
+@CrossOrigin(origins="http://localhost:5174")
+@RestController
+@RequestMapping("/user")
+public class UserController {
+	@Autowired
+	private TaskService ts;
+    @Autowired
+	private UserService us;
+    @GetMapping("/list-tasks")
+    public ResponseEntity<Page<UserTaskListResponseDTO>> getUserTasks(
+        @RequestParam(defaultValue="0") int page,
+        @RequestParam(defaultValue="10") int size,
+        @RequestParam String username,
+        @RequestParam(required=false) String assignedDate,
+        @RequestParam(required=false) String deadlineDate
+    ) {
+
+        LocalDate aDate = null;
+        LocalDate dDate = null;
+
+        if (assignedDate != null && !assignedDate.isBlank()) {
+            aDate = LocalDate.parse(assignedDate);
+        }
+        if (deadlineDate != null && !deadlineDate.isBlank()) {
+            dDate = LocalDate.parse(deadlineDate);
+        }
+
+        return ResponseEntity.ok(
+            ts.getUserTasks(page, size, username, aDate, dDate)
+        );
+    }
+
+}

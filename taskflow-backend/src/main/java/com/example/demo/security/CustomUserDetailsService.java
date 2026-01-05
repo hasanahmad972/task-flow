@@ -31,7 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 				 .withUsername(user.getUsername())
 	                .password(user.getPassword())
 	                .roles("USER")
-	                .build();
+	                
+	                  .build();
 		}
 		Optional<Admin> a=ar.findByUsername(username);
 				  

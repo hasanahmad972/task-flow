@@ -17,6 +17,11 @@ export const addTask=(id,data)=>API.post(`/admin/add-task/${id}`,data);
 export const listTask=(params)=>API.get("/admin/list-tasks",{params});
 
 
+export const getUserTask=(params)=>API.get("/user/list-tasks",{params});
+export const updateStatus2 = (id, status) =>
+  API.put(`/user/tasks/${id}/status`, null, { params: { status } });
 
 
 
+
+ 

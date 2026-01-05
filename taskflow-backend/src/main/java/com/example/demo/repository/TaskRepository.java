@@ -7,10 +7,13 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.demo.model.Task;
+
+import jakarta.transaction.Transactional;
 
 public interface TaskRepository extends JpaRepository<Task,Long> {
 	List <Task> findByUserId(Long userid);
@@ -36,6 +39,30 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
 		    @Param("deadlineTo") LocalDateTime deadlineTo,
 		    Pageable pageable
 		);
+	
+	
+	@Query("""
+		    SELECT t FROM Task t
+		    WHERE t.user.id = :userId
+		      AND t.assignedDate >= COALESCE(:assignedFrom, t.assignedDate)
+		      AND t.assignedDate <= COALESCE(:assignedTo, t.assignedDate)
+		      AND t.deadline     >= COALESCE(:deadlineFrom, t.deadline)
+		      AND t.deadline     <= COALESCE(:deadlineTo, t.deadline)
+		    ORDER BY t.assignedDate DESC
+		""")
+			Page<Task> userfilterTasks(
+			    @Param("userId") Long userId,
+			    @Param("assignedFrom") LocalDateTime assignedFrom,
+			    @Param("assignedTo") LocalDateTime assignedTo,
+			    @Param("deadlineFrom") LocalDateTime deadlineFrom,
+			    @Param("deadlineTo") LocalDateTime deadlineTo,
+			    Pageable pageable
+			);
+	 @Modifying
+	    @Transactional
+	    @Query("DELETE FROM Task t WHERE t.user.id = :userId")
+	    void deleteByUserId(@Param("userId") Long userId);
+
 
 }
 

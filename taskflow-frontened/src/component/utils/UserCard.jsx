@@ -14,12 +14,11 @@ export default function UserCard({ user, onDeleteSuccess }) {
   
   const [popupData, setPopupData] = useState(null);
   const delUsers = async (id) => {
+    console.log("button clicked");
     try {
       const res = await delUserApi(id);
       console.log(res.data);
       onDeleteSuccess();
-
-
     } catch (err) {
       console.error(err);
     }

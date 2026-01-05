@@ -1,0 +1,137 @@
+package com.example.demo.service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Optional;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.TaskAssignRequest;
+import com.example.demo.dto.TaskAssignResponse;
+import com.example.demo.dto.TaskListResponseDTO;
+import com.example.demo.dto.UserTaskListResponseDTO;
+import com.example.demo.model.Admin;
+import com.example.demo.model.Task;
+import com.example.demo.model.TaskStatus;
+import com.example.demo.model.User;
+import com.example.demo.repository.AdminRepository;
+import com.example.demo.repository.TaskRepository;
+import com.example.demo.repository.UserRepository;
+@Service
+public class TaskService {
+	@Autowired
+	private AdminRepository ar;
+   @Autowired
+	private TaskRepository tr;
+	@Autowired
+	private UserRepository ur;
+	
+	
+	
+	 public Page<TaskListResponseDTO> getFilteredTasks(int page, int size, Long userId, LocalDate assignedDate,
+				LocalDate deadlineDate) {
+
+			Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+			String adminUsername=auth.getName();
+			Admin a=ar.findByUsername(adminUsername).orElseThrow(()->new RuntimeException("Admin not found"));
+			   LocalDateTime assignedFrom=null;
+			   LocalDateTime assignedTo=null;
+			   if(assignedDate!=null) {
+				   assignedFrom=assignedDate.atStartOfDay();
+				   assignedTo=assignedDate.atTime(LocalTime.MAX);
+			   }
+			   LocalDateTime deadlineFrom=null;
+			   LocalDateTime deadlineTo=null;
+			   if(deadlineDate!=null) {
+				   deadlineFrom=deadlineDate.atStartOfDay();
+				   deadlineTo=deadlineDate.atTime(LocalTime.MAX);
+			   }
+			   
+			   Pageable pageable=PageRequest.of(page, size, Sort.by("assignedDate").descending());
+			   
+			   Page<Task> taskPage=tr.filterTasks(
+					   a.getId(),userId,assignedFrom,assignedTo,deadlineFrom,deadlineTo,pageable);
+			   
+			   
+			   return taskPage.map(task->{
+				   TaskListResponseDTO dto=new TaskListResponseDTO();
+				   dto.setId(task.getId());
+				   dto.setUserId(task.getUser().getId());
+				   dto.setAssignedDate(task.getAssignedDate());
+				   dto.setDescription(task.getDescription());
+				   dto.setDeadline(task.getDeadline());
+				   dto.setStatus(task.getStatus());
+				   dto.setUsername(task.getUser().getUsername());
+				   dto.setTaskname(task.getTaskname());
+				  return dto;
+			   });
+			
+			
+		   }
+	 public Page<UserTaskListResponseDTO> getUserTasks(int page, int size, String username, LocalDate assignedDate,
+				LocalDate deadlineDate){
+		 User u=ur.findByUsername(username).orElseThrow(()->new RuntimeException("username does'nt find"));
+		 LocalDateTime assignedFrom=null;
+		   LocalDateTime assignedTo=null;
+		   if(assignedDate!=null) {
+			   assignedFrom=assignedDate.atStartOfDay();
+			   assignedTo=assignedDate.atTime(LocalTime.MAX);
+		   }
+		   LocalDateTime deadlineFrom=null;
+		   LocalDateTime deadlineTo=null;
+		   if(deadlineDate!=null) {
+			   deadlineFrom=deadlineDate.atStartOfDay();
+			   deadlineTo=deadlineDate.atTime(LocalTime.MAX);
+		   }
+		   Pageable pageable=PageRequest.of(page, size, Sort.by("assignedDate").descending());
+		   Page<Task> taskPage=tr.userfilterTasks(userId,assignedFrom,assignedTo,deadlineFrom,deadlineTo,pageable);
+           return taskPage.map(task->{
+        	   UserTaskListResponseDTO dto=new UserTaskListResponseDTO();
+        	   dto.setId(task.getId());
+			   dto.setAssignedDate(task.getAssignedDate());
+			   dto.setDescription(task.getDescription());
+			   dto.setDeadline(task.getDeadline());
+			   dto.setStatus(task.getStatus());
+        	   return dto;
+           });
+	 }
+	 
+	 
+	 public Page<Task> getTasks(int page, int size) {
+
+			Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+			String adminUsername=auth.getName();
+			Admin a=ar.findByUsername(adminUsername).orElseThrow(()->new RuntimeException("Admin not found"));
+			Pageable pageable=PageRequest.of(page, size,Sort.by("assignedDate").descending());
+			return tr.findByUser_CreatedByAdmin_Id(a.getId(),pageable);
+			}
+	
+	 
+	 
+	
+	 public TaskAssignResponse assignTaskToUser(Long userId, TaskAssignRequest tar) {
+		User u=ur.findById(userId).orElseThrow(()->new RuntimeException("USer Not Found"));
+		Task task=new Task();
+		task.setTaskname(tar.getTaskname());
+		task.setDeadline(tar.getDeadline());
+		task.setDescription(tar.getDescription());
+		task.setUser(u);
+		task.setStatus(TaskStatus.PENDING);
+		Task t=tr.save(task);
+		TaskAssignResponse tas=new TaskAssignResponse(t.getId(),t.getTaskname(),t.getDescription(),t.getDeadline(),t.getAssignedDate(),t.getStatus()
+				,u.getId());
+		return tas;
+	    }
+  
+  
+
+}
