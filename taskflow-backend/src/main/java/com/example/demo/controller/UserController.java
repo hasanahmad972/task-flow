@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.TaskDataDTO;
 import com.example.demo.dto.TaskListResponseDTO;
 import com.example.demo.dto.UserTaskListResponseDTO;
 import com.example.demo.model.TaskStatus;
+import com.example.demo.model.User;
 import com.example.demo.service.TaskService;
 import com.example.demo.service.UserService;
 
@@ -28,6 +32,20 @@ public class UserController {
 	private TaskService ts;
     @Autowired
 	private UserService us;
+    @PutMapping("/changepassword/newPass")
+    public ResponseEntity<String> updatePass(@RequestParam  String newPass){
+    	Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+		String username=auth.getName();
+    	return us.updatePass(username,newPass);
+    }
+    @GetMapping("/getTaskData")
+    public ResponseEntity<TaskDataDTO> getData(){
+    	Authentication auth=SecurityContextHolder.getContext().getAuthentication();
+		String username=auth.getName();
+		return ResponseEntity.ok(us.task_data(username));
+    	
+    }
+    
     @PutMapping("/tasks/{id}/status")
     public ResponseEntity<String> updateStatus(
             @PathVariable Long id,

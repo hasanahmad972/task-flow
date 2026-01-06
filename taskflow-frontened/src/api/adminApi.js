@@ -20,8 +20,8 @@ export const listTask=(params)=>API.get("/admin/list-tasks",{params});
 export const getUserTask=(params)=>API.get("/user/list-tasks",{params});
 export const updateStatus2 = (id, status) =>
   API.put(`/user/tasks/${id}/status`, null, { params: { status } });
-
-
+export const updatePass=(newPass)=>API.put(`/user/changepassword`,null,{params:{newPass}});
+export const getTaskData=()=>API.get("user/getTaskData");
 
 
  

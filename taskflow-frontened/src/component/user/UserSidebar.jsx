@@ -4,8 +4,8 @@ import { User, Activity, CheckSquare } from "lucide-react";
 
 export default function UserSidebar() {
   const items = [
-    { label: "Profile", icon: User, path: "/user/profile" },
-    { label: "Status", icon: Activity, path: "/user/status" },
+    { label: "Dashboard", icon: User, path: "/user/profile" },
+    
     { label: "Tasks", icon: CheckSquare, path: "/user/tasks" },
   ];
 
@@ -13,8 +13,8 @@ export default function UserSidebar() {
     <aside className="h-screen w-64 bg-white dark:bg-[#3f3a66] border-r border-gray-200 dark:border-white/10 flex flex-col">
       
       {/* Header */}
-      <div className="px-6 py-5 border-b border-gray-200 dark:border-white/10">
-        <h1 className="text-xl font-bold text-[#857dba]">Dashboard</h1>
+      <div className="border-b border-gray-200 dark:border-white/10">
+        
       </div>
 
       {/* Menu */}

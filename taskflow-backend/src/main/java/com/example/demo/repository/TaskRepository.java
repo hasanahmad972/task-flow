@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.demo.model.Task;
+import com.example.demo.model.TaskStatus;
 
 import jakarta.transaction.Transactional;
 
@@ -62,6 +63,10 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
 	    @Transactional
 	    @Query("DELETE FROM Task t WHERE t.user.id = :userId")
 	    void deleteByUserId(@Param("userId") Long userId);
+	 
+	   long countByUserId(Long userId);
+	   long countByUserIdAndStatus(Long userId,TaskStatus status);
+	    
 
 
 }

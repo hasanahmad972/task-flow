@@ -2,34 +2,45 @@ import React from "react";
 
 export default function UserFooter() {
   return (
-    <footer className="bg-gray-900 text-gray-300 py-6 mt-10">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
-        
-        {/* Left */}
-        <h3 className="text-lg font-semibold text-white">
-          MyApp
-        </h3>
+<footer
+  className="
+    fixed
+    bottom-0
+    h-[56px]
+    bg-gray-900
+    text-gray-300
+    z-40
 
-        {/* Center */}
-        <p className="text-sm mt-2 md:mt-0">
-          © 2026 MyApp. All rights reserved.
-        </p>
+    /* desktop */
+    md:left-60
+    md:w-[calc(100%-15rem)]
 
-        {/* Right */}
-        <div className="flex gap-6 mt-3 md:mt-0">
-          <a href="#" className="hover:text-white transition">
-            Privacy
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Terms
-          </a>
-          <a href="#" className="hover:text-white transition">
-            Contact
-          </a>
-        </div>
+    /* mobile */
+    left-0
+    w-full
+  "
+>
+  <div className="h-full px-6 flex items-center justify-between">
 
-      </div>
-    </footer>
+    <h3 className="text-sm font-semibold text-white">
+      MyApp
+    </h3>
+
+    <p className="text-xs">
+      © 2026 MyApp. All rights reserved.
+    </p>
+
+    <div className="flex gap-4 text-sm">
+      <a href="#" className="hover:text-white">Privacy</a>
+      <a href="#" className="hover:text-white">Terms</a>
+      <a href="#" className="hover:text-white">Contact</a>
+    </div>
+
+  </div>
+</footer>
+
+
+
   );
 }
 
